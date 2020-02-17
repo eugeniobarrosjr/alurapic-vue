@@ -1,32 +1,89 @@
 <template>
-  <div>
-    <h1>{{ title }}</h1>
-    <ul>
-      <li v-bind:key="photo.id" v-for="photo of photos">
-        <img :src="photo.src" :alt="photo.alt" />
+  <div class="corpo">
+    <h1 class="centralizado">{{ title }}</h1>
+
+    <input
+      type="search"
+      class="filtro"
+      @input="filtro = $event.target.value"
+      placeholder="filtre pelo título"
+    />
+    <ul class="lista-fotos">
+      <li
+        class="lista-fotos-item"
+        v-bind:key="foto._id"
+        v-for="foto of fotosComFiltro"
+      >
+        <foto-painel :titulo="foto.titulo">
+          <img class="imagem-responsiva" :alt="foto.titulo" :src="foto.url" />
+        </foto-painel>
       </li>
     </ul>
   </div>
 </template>
 
 <script>
+import Painel from './components/shared/painel/Painel';
 export default {
+  components: {
+    'foto-painel': Painel,
+  },
   data() {
     return {
-      title: "Alurapic",
-      photos: []
+      title: 'Alurapic',
+      fotos: [],
+      filtro: '',
     };
   },
+
+  computed: {
+    fotosComFiltro() {
+      if (this.filtro) {
+        let exp = new RegExp(this.filtro.trim(), 'i');
+        return this.fotos.filter(foto => exp.test(foto.titulo));
+      } else {
+        return this.fotos;
+      }
+    },
+  },
+
   created() {
     this.$http
-      .get("http://localhost:3000/v1/fotos")
+      .get('http://localhost:3000/v1/fotos')
       .then(res => res.json())
       .then(
-        photos => (this.photos = photos),
+        fotos => (this.fotos = fotos),
         error => console.log(error)
       );
-  }
+  },
 };
 </script>
 
-<style></style>
+<style scoped>
+.corpo {
+  font-family: Helvetica, sans-serif;
+  width: 96%;
+  margin: 0 auto;
+}
+
+.centralizado {
+  text-align: center;
+}
+
+.lista-fotos {
+  list-style: none;
+}
+
+.lista-fotos .lista-fotos-item {
+  display: inline-block;
+}
+
+.imagem-responsiva {
+  width: 100%;
+}
+
+.filtro {
+  display: block;
+  width: 100%;
+}
+</style>
